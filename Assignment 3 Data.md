@@ -1,4 +1,12 @@
-
+## Roles
+- Margot in charge of
+	- QGIS processing and mapping
+	- editing/polishing graphics/maps
+	- research/writing
+- Max in charge of
+	- R processing, graphics (and mapping maybe)
+	- Datawrapper mapping?
+	- writing/editing
 ## General Notes
 
 MapPluto
