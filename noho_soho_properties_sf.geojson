@@ -1,0 +1,15 @@
+{
+"type": "FeatureCollection",
+"name": "properties_sf",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::2263" } },
+"features": [
+{ "type": "Feature", "properties": { "address": "35 West 4th Street, New York, NY" }, "geometry": { "type": "Point", "coordinates": [ -73.575888, 40.6376311 ] } },
+{ "type": "Feature", "properties": { "address": "726 Broadway, New York, NY" }, "geometry": { "type": "Point", "coordinates": [ -73.9932385, 40.7292215 ] } },
+{ "type": "Feature", "properties": { "address": "708 Broadway, New York, NY" }, "geometry": { "type": "Point", "coordinates": [ -73.993636717053363, 40.72865205 ] } },
+{ "type": "Feature", "properties": { "address": "404 Lafayette, New York, NY" }, "geometry": { "type": "Point", "coordinates": [ -76.1052019, 42.892289 ] } },
+{ "type": "Feature", "properties": { "address": "14 E 4th Street, New York, NY" }, "geometry": { "type": "Point", "coordinates": [ -73.97832265, 40.65225205 ] } },
+{ "type": "Feature", "properties": { "address": "383 Lafayette Street, New York, NY" }, "geometry": { "type": "Point", "coordinates": [ -73.992999669265032, 40.7276311 ] } },
+{ "type": "Feature", "properties": { "address": "411 Lafayette Street, New York, NY" }, "geometry": { "type": "Point", "coordinates": [ -73.992217631474219, 40.7283162 ] } },
+{ "type": "Feature", "properties": { "address": "20 Cooper Square, New York, NY" }, "geometry": { "type": "Point", "coordinates": [ -73.991683153815103, 40.727786 ] } }
+]
+}

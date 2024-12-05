@@ -1,0 +1,70 @@
+
+## General Notes
+
+MapPluto
+
+- Field OwnerType
+	- Value X
+		- Description Fully tax-exempt property that may be owned by the city, state, or federal government; a public authority; or a private institution
+
+241126 Lucy Meeting
+- start early and test whether it is possible
+	- proof of concept to prove it happens
+- focus on targeted areas rather than trying to prove causation/close relationship
+	- look at local news coverage around big new dorm
+	- NYU Stuyvesant town agreement?
+- ACRIS open data
+	- real property parties
+	- real property master has specific info about recorded documents
+- maxwell austenson (JustFix) could help with pulling property/portfolio information
+	- Maxwell@justfix.org
+- DAP portal
+- ZoLA
+- Look at NYU dorms
+- talk about why relationship between noise complaints and dorms matters
+- look at demographic shifts in zip codes
+
+# Plan
+
+## Data
+### property data
+- building selection
+	- criteria
+		- move-in date post 2010
+		- somewhat adjacent/within a residential neighborhood
+	- options
+		- Columbia
+			- 600 west 125th street
+		- NYU
+			- Paulson
+- Pluto
+	- have list of NYU properties
+		- no dates built
+- **ACRIS Open Data**
+	- Parties
+		- looking up NYU, finding properties
+			- plot on map, only take within village zip codes?
+	- Master
+		- pull recorded documents based on address list
+		- filter for lease/deed?
+		- map
+- JustFix
+	- Properties purchased since 20
+- 
+### noise/displacement data
+- 311 data
+	- filter for 
+		- zip codes
+		- relevant complaints
+		- 2010-
+	- create sub dataset with buffer around NYU properties
+		- based on map
+# Graphics
+
+# Writing Portion
+## Background
+- Palladium 
+	- https://en.wikipedia.org/wiki/Palladium_(New_York_City)#:~:text=The%20Palladium%20was%20converted%20from,Steve%20Rubell%20and%20Ian%20Schrager
+	- https://www.artsy.net/article/artsy-editorial-6-iconic-new-york-artworks-that-were-destroyed
+	- https://indypendent.org/2024/10/west-harlem-pushes-back-against-columbias-latest-manhattanville-campus-expansion/
+
