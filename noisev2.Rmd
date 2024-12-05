@@ -13,6 +13,8 @@ library(formattable)
 library(sf)
 library(ggplot2)
 library(tidygeocoder)
+install.packages("tmap")
+library(tmap)
 library(ggmap)
 register_google(key = "AIzaSyDWgdNlNOOYlsUXRW_7Fe3FpdcZeTYIxrE")
 
@@ -46,24 +48,29 @@ calls_filtered <- calls %>%
   clean_names()
 
 #convert to sf
-calls_sf <- st_as_sf(calls_filtered, coords = c("longitude", "latitude"), crs = 2263)
+calls_sf <- st_as_sf(calls_filtered, coords = c("longitude", "latitude"), crs = 4326)
 
 ```
 
 ```{r Houston and Broadway buffer}
 
 # Define your point as an sf object
-point <- st_as_sf(data.frame(id = 1, 
-                             lon = -73.9994136, 
-                             lat = 40.7253766), 
+point <- st_as_sf(data.frame(id = 1,
+                             lon = -73.9994136,
+                             lat = 40.7253766),
                   coords = c("lon", "lat"), crs = 2263)
 
-point_proj <- st_transform(point, 2263)
+# point_proj <- st_transform(point, 2263)
 
-buffer <- st_buffer(point_proj, dist = .01) #distance in degrees
+buffer <- st_buffer(point, dist = .001) #distance in degrees
 
-data_within_buffer <- calls_sf[st_within(calls_sf, buffer, sparse = FALSE), ]
+st_crs(calls_sf) == st_crs(buffer) #test crs
 
+plot(st_geometry(buffer), col = "white", border = "blue")  # Plot buffer
+plot(st_geometry(calls_sf), add = TRUE, col = "red")      # Add calls points
+
+
+data_within_buffer <- st_join(calls_sf, buffer, join = st_within)
 ```
 
 ```{r heatmap}
@@ -90,44 +97,107 @@ print(heatmap)
 
 ```
 
-```{r property map}
-#list of NYU buildings within neighborhood plan
-addresses <- data.frame(
-  address = c(
-    "35 West 4th Street, New York, NY",
-    "726 Broadway, New York, NY",
-    "708 Broadway, New York, NY",
-    "404 Lafayette, New York, NY",
-    "14 E 4th Street, New York, NY",
-    "383 Lafayette Street, New York, NY",
-    "411 Lafayette Street, New York, NY",
-    "20 Cooper Square, New York, NY"
-  )
-)
 
-# Convert to sf object (EPSG:4326 by default)
-coordinates <- addresses %>%
-  mutate_geocode(address, method = "google", lat = "latitude", long = "longitude")
+```{r props w BBLs}
 
-# Step 3: Convert to sf object in EPSG:4326 (default from geocode)
-properties_sf <- st_as_sf(coordinates, coords = c("longitude", "latitude"), crs = 4326)
+#THIS IS HOW TO GET TO SHAPEFILE I READ IN BELOW (it's in drive now so we can avoid using entire mappluto file)
 
-# Step 4: Transform to EPSG:2263
-properties_sf_2263 <- st_transform(properties_sf, crs = 2263)
+# #mappluto shapefile
+# mappluto <- st_read("nyc_mappluto_24v3_1_fgdb/MapPLUTO24v3_1.gdb")
+# 
+# head(mappluto)
+# 
+# mappluto_clean <- mappluto %>%
+#   select(Address, APPBBL)
+# 
+# #writing this to git for easier access - but it will be in drive and ignored on github
+# st_write(mappluto_clean, "mappluto_bbl_address.geojson")
 
-# Check CRS
-st_crs(properties_sf_2263)  # Should now be EPSG:2263
+# ---------------------------------------------------------------------------------------------------
+
+mappluto <- st_read("mappluto_bbl_address.geojson")
+
+#nyu landlord properties (justfix)
+justfix_nyu_props <- read.csv("nyuprops_who_owns_what_export.csv")
+
+# Filter the BBL polygons based on your property BBLs
+properties_sf_bbl <- mappluto[mappluto$APPBBL %in% justfix_nyu_props$bbl, ]
+
+# View the result
+plot(st_geometry(properties_sf_bbl), col = "purple", border = "blue")
+
+```
+
+```{r bbl props buffer}
+
+# Create a 100-foot buffer around the properties
+buffer_100ft <- st_buffer(properties_sf, dist = 100) %>%
+  st_transform(crs = st_crs(properties_sf_bbl))
+
+
+st_crs(buffer_100ft)
+st_crs(properties_sf_bbl)
+
+# Plot the result: Properties (purple points) and 100ft buffer (blue)
+plot(st_geometry(buffer_100ft), border = "blue", main = "Properties and 100ft Buffer")
+plot(st_geometry(properties_sf), add = TRUE, col = "purple", pch = 16)
+
+
+
+```
+
+
+
+```{r prop w COORDINATES via google API}
+# #list of NYU buildings within neighborhood plan
+# addresses <- data.frame(
+#   address = c(
+#     "35 West 4th Street, New York, NY",
+#     "726 Broadway, New York, NY",
+#     "708 Broadway, New York, NY",
+#     "404 Lafayette, New York, NY",
+#     "14 E 4th Street, New York, NY",
+#     "383 Lafayette Street, New York, NY",
+#     "411 Lafayette Street, New York, NY",
+#     "20 Cooper Square, New York, NY"
+#   )
+# )
+# ### COORDINATES w google API
+# 
+# # Convert to sf object (EPSG:4326 by default)
+# coordinates <- addresses %>%
+#   mutate_geocode(address, method = "google", latitude = "latitude", longitude = "longitude")
+# 
+# # Check coordinates returned by geocode
+# print(coordinates)
+# summary(coordinates$longitude)  # Should be around -74 for NYC
+# summary(coordinates$latitude)   # Should be around 40.7 for NYC
+# 
+# # Step 3: Convert to sf object in EPSG:4326 (default from geocode)
+# properties_sf <- st_as_sf(coordinates, coords = c("latitude", "longitude"), crs = 4326)
+# 
+# # # Step 4: Transform to EPSG:2263
+# # properties_sf_2263 <- st_transform(properties_sf, crs = 2263)
+# # 
+# # # Check CRS
+# # st_crs(properties_sf_2263)  # Should now be EPSG:2263
 
 ```
 
 
 ```{r properties with buffer}
 
+# # Ensure valid sf objects and CRS compatibility
+# buffer <- st_transform(buffer, st_crs(properties_sf_2263))
+# data_within_buffer <- st_transform(data_within_buffer, st_crs(properties_sf_2263))
+
+convert sfs
+
+# Create the heatmap
 heatmap <- ggplot() +
-  geom_sf(data = properties_sf_2263, color = "purple") +# properties
-  geom_sf(data = buffer, fill = NA, color = "blue") +  # Buffer boundary
-  geom_sf(data = data_within_buffer, aes(color = "311 Calls"), alpha = 0.5, size = 0.5) +
-  scale_color_manual(values = "red") +
+  geom_sf(data = buffer, fill = NA, color = "blue") +
+  geom_sf(data = properties_sf_bbl, aes(color = "311 Calls"), alpha = 0.5, size = 0.5) +
+  geom_sf(data = properties_sf, aes(color = "NYU Properties"), alpha = 2, size = 2)  +
   theme_minimal() +
   labs(title = "311 Calls Heatmap (Transparency Effect)",
        subtitle = "Within buffer",

@@ -58,7 +58,19 @@ MapPluto
 		- map
 - JustFix
 	- Properties purchased since 20
-- 
+*NYU NOHOSOHO PROPERTIES*
+
+| Name                                                                                                                                                                    | Address              | Latitude | Longitude | BBL |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | -------- | --------- | --- |
+| Education Building (B-2)                                                                                                                                                | 35 West 4th Street   |          |           |     |
+| Bookstore and Computer Store (B-2)  College of Arts and Science (B-2) (Interim)<br>Global Liberal Studies<br>Liberal Studies<br>Moses Center<br>Res Life<br>SHC<br><br> | 726 Broadway         |          |           |     |
+| School of Global Public Health                                                                                                                                          | 708 Broadway         |          |           |     |
+| 404 Fitness                                                                                                                                                             | 404 Lafayette        |          |           |     |
+| NYU Shanghai                                                                                                                                                            | 14 E 4th Street      |          |           |     |
+| Admissions Office                                                                                                                                                       | 383 Lafayette Street |          |           |     |
+|                                                                                                                                                                         | 411 Lafayette Street |          |           |     |
+|                                                                                                                                                                         | 20 Cooper Square     |          |           |     |
+ 
 ### noise/displacement data
 - 311 data
 	- filter for 
