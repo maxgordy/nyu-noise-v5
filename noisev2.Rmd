@@ -13,11 +13,14 @@ library(formattable)
 library(sf)
 library(ggplot2)
 library(tidygeocoder)
+library(ggmap)
+register_google(key = "AIzaSyDWgdNlNOOYlsUXRW_7Fe3FpdcZeTYIxrE")
 
 ```
 
 
 ```{r read calls}
+#import csv cleaned for NYU and CU zip codes
 calls <- read.csv("311_Noise_Complaints.csv")
 # Convert "Created.Date" to Date format and extract the year
 calls <- calls %>%
@@ -102,14 +105,35 @@ addresses <- data.frame(
   )
 )
 
+# Convert to sf object (EPSG:4326 by default)
 coordinates <- addresses %>%
-  geocode(address, method = "osm", lat = "latitude", long = "longitude")
+  mutate_geocode(address, method = "google", lat = "latitude", long = "longitude")
 
-# Convert to sf object
-properties_sf <- st_as_sf(coordinates, coords = c("longitude", "latitude"), crs = 2263)
+# Step 3: Convert to sf object in EPSG:4326 (default from geocode)
+properties_sf <- st_as_sf(coordinates, coords = c("longitude", "latitude"), crs = 4326)
+
+# Step 4: Transform to EPSG:2263
+properties_sf_2263 <- st_transform(properties_sf, crs = 2263)
+
+# Check CRS
+st_crs(properties_sf_2263)  # Should now be EPSG:2263
+
 ```
 
+
 ```{r properties with buffer}
+
+heatmap <- ggplot() +
+  geom_sf(data = properties_sf_2263, color = "purple") +# properties
+  geom_sf(data = buffer, fill = NA, color = "blue") +  # Buffer boundary
+  geom_sf(data = data_within_buffer, aes(color = "311 Calls"), alpha = 0.5, size = 0.5) +
+  scale_color_manual(values = "red") +
+  theme_minimal() +
+  labs(title = "311 Calls Heatmap (Transparency Effect)",
+       subtitle = "Within buffer",
+       color = NULL)
+  
+print(heatmap)
 
 ```
 
