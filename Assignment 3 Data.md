@@ -57,8 +57,13 @@ MapPluto
 		- zip codes
 		- relevant complaints
 		- 2010-
-	- create sub dataset with buffer around NYU properties
-		- based on map
+	- create sub dataset
+	- ![[Screenshot 2024-12-05 at 11.12.05 AM.png]]
+
+new plan
+- pull lot info of 7/8 nyu properties, put into data frame
+	- ![[Screenshot 2024-12-05 at 11.12.15 AM.png]]
+
 # Graphics
 
 # Writing Portion
