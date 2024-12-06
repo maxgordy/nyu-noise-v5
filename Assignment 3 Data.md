@@ -71,6 +71,32 @@ MapPluto
 |                                                                                                                                                                         | 411 Lafayette Street |          |           |     |
 |                                                                                                                                                                         | 20 Cooper Square     |          |           |     |
  
+**Res Halls** (NYU in Manhattan)
+
+| Building               | Address                |
+| ---------------------- | ---------------------- |
+| Brittany Hall          | 55 East 10th Street    |
+| Founders Hall          | 120 East 12th Street   |
+| Lipton Hall            | 33 Washington Square   |
+| Res College at Paulson | 181 Mercer Street      |
+| Rubin Hall             | 35 Fifth Street        |
+| Weinstein Hall         | 5 University Place     |
+| Alumni Hall            | 33 Third Avenue        |
+| Broome Street          | 400 Broome Street      |
+| Carlyle Court          | 25 Union Square West   |
+| Coral Tower            | 129 Third Avenue       |
+| Gramercy Green         | 310 3rd Avenue         |
+| Greenwich Hall         | 636 Greenwich Street   |
+| Lafayette Hall         | 80 Lafayette Street    |
+| Palladium Hall         | 140 East 14th Street   |
+| Second Street          | 1 East 2nd Street      |
+| Seventh Street         | 40 East Seventh Street |
+| Sixth Street           | 200 East 6th St        |
+| Third North            | 75 Third Avenue        |
+| University Hall        | 110 East 14th Street   |
+| Clark Street           | 55 Clark Street        |
+
+
 ### noise/displacement data
 - 311 data
 	- filter for 

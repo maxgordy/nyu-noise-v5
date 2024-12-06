@@ -44,51 +44,54 @@ calls_filtered <- calls %>%
   clean_names()
 
 #convert to sf
-calls_sf <- st_as_sf(calls_filtered, coords = c("longitude", "latitude"), remove = FALSE, crs = 2263)
+calls_sf <- st_as_sf(calls_filtered, coords = c("longitude", "latitude"), remove = FALSE, crs = 4326)
 
 ```
 
-```{r Houston and Broadway buffer}
-# #COMMENTING THIS OUT BC WE ARE NON LONGER USING THIS BUFFER and also it doesn't work lol
-# 
-# # Define your point as an sf object
-# point <- st_as_sf(data.frame(id = 1,
-#                              lon = -73.9994136,
-#                              lat = 40.7253766),
-#                   coords = c("lon", "lat"), crs = 2263)
-# 
-# point_proj <- st_transform(point, crs = 2263)
-# 
-# buffer <- st_buffer(point_proj, dist = 100) 
-# 
-# st_crs(calls_sf) == st_crs(buffer) #test crs
-# 
-# plot(st_geometry(buffer), col = "white", border = "blue")  # Plot buffer
-# plot(st_geometry(calls_sf), add = TRUE, col = "red")      # Add calls points
-# 
-# data_within_buffer <- st_join(calls_sf, buffer, join = st_within)
-# 
-# # #MAPPING
-# 
-# # allcallsmap <- ggplot() +
-# #   geom_sf(data = calls_sf, aes(color = "311 Calls"), alpha = 0.5, size = 0.5) +
-# #   scale_color_manual(values = "red") +
-# #   theme_minimal() +
-# #   labs(title = "311 Calls Heatmap (Transparency Effect)",
-# #        color = NULL)
-# # 
-# # print(allcallsmap)
-# 
-# heatmap <- ggplot() +
-#   geom_sf(data = buffer, fill = NA, color = "blue") +  # Buffer boundary
-#   geom_sf(data = data_within_buffer, aes(color = "311 Calls"), alpha = 0.5, size = 0.5) +
+```{r Wash Sq Park buffer}
+#COMMENTING THIS OUT BC WE ARE NON LONGER USING THIS BUFFER and also it doesn't work lol
+
+# Define your point as an sf object
+point <- st_as_sf(data.frame(id = 1,
+                             lon = -73.9999069,
+                             lat = 40.7308878),
+                  coords = c("lon", "lat"), crs = 4326)
+                  
+
+point_proj <- st_transform(point, crs = 4326)
+
+buffer <- st_buffer(point_proj, dist = 1200)
+
+st_crs(calls_sf) == st_crs(buffer) #test crs
+
+plot(st_geometry(buffer), col = "white", border = "blue")  # Plot buffer
+plot(st_geometry(calls_sf), add = TRUE, col = "red")      # Add calls points
+
+# Filter calls_sf points that are within the buffer
+data_within_buffer <- calls_sf %>%
+  filter(st_within(geometry, buffer, sparse = FALSE) %>% rowSums() > 0)
+
+# #MAPPING
+
+# allcallsmap <- ggplot() +
+#   geom_sf(data = calls_sf, aes(color = "311 Calls"), alpha = 0.5, size = 0.5) +
 #   scale_color_manual(values = "red") +
 #   theme_minimal() +
 #   labs(title = "311 Calls Heatmap (Transparency Effect)",
-#        subtitle = "Within buffer",
 #        color = NULL)
-# 
-# print(heatmap)
+#
+# print(allcallsmap)
+
+heatmap <- ggplot() +
+  geom_sf(data = buffer, fill = NA, color = "blue") +  # Buffer boundary
+  geom_sf(data = data_within_buffer, aes(color = "311 Calls"), alpha = 0.5, size = 0.5) +
+  scale_color_manual(values = "red") +
+  theme_void() +
+  labs(title = "311 Noise Calls Heatmap (Transparency Effect)",
+       subtitle = "Within 1200m buffer",
+       color = NULL)
+
+print(heatmap)
 ```
 
 ```{r props w BBLs}
@@ -108,13 +111,17 @@ calls_sf <- st_as_sf(calls_filtered, coords = c("longitude", "latitude"), remove
 # st_write(mappluto_clean, "mappluto_bbl_address.geojson")
 # ---------------------------------------------------------------------------------------------------
 
-mappluto <- st_read("mappluto_bbl_address.geojson") #from google drive /PLUTO
+# mappluto <- st_read("mappluto_bbl_address.geojson") #from google drive /PLUTO
 
 #nyu landlord properties (justfix)
 justfix_nyu_props <- read.csv("nyuprops_who_owns_what_export.csv") #from github or drive /justfix
 
 # Filter the BBL polygons based on your property BBLs
 properties_sf_bbl <- mappluto[mappluto$APPBBL %in% justfix_nyu_props$bbl, ]
+
+#write out shapefiles of these properties
+# st_write(properties_sf_bbl, "nyuprops_bbl_address.geojson")
+
 
 # View the result
 plot(st_geometry(properties_sf_bbl), col = "purple")
@@ -187,13 +194,13 @@ plot(st_geometry(calls_sf), add = TRUE, col = "lightblue", pch = 16)
 ```{r properties with buffer}
 
 # # Ensure CRS compatibility
-st_crs(calls_sf)
-summary(calls_sf$longitude)  # Should be around -74 for NYC
-summary(calls_sf$latitude)   # Should be around 40.7 for NYC
+st_crs(data_within_buffer)
+summary(data_within_buffer$longitude)  # Should be around -74 for NYC
+summary(data_within_buffer$latitude)   # Should be around 40.7 for NYC
 
 st_crs(properties_sf_bbl)
 
-calls_sf <- st_transform(calls_sf, crs = st_crs(properties_sf_bbl))
+calls_sf <- st_transform(data_within_buffer, crs = st_crs(properties_sf_bbl))
 
 # # having crs issues :/ should probably figure this out in QGIS
 # calls_and_props <- st_join(calls_sf, properties_sf_bbl)
@@ -202,22 +209,22 @@ calls_sf <- st_transform(calls_sf, crs = st_crs(properties_sf_bbl))
 # Create the heatmap
 heatmap <- ggplot() +
   # Plot 311 Calls with transparency (alpha)
-  geom_sf(data = calls_sf, aes(color = "311 Calls"), alpha = 0.5, size = 0.5) +
+  geom_sf(data = calls_sf, aes(color = "Noise Complaints"), alpha = 0.5, size = 0.5) +
   
   # Plot Buffer layer with light blue semi-transparent fill and no outline
-  geom_sf(data = buffer_100ft, fill = "lightblue", color = NA, alpha = 0.5) +
+  geom_sf(data = buffer_100ft, fill = "100ft Buffer", color = NA, border = "blue", alpha = 0.5) +
   
   # Plot properties with purple outline and no fill (transparent)
   geom_sf(data = properties_sf_bbl, aes(color = "NYU Properties"), fill = NA, alpha = 1, size = 2) +
   
   # Customize theme and labels
   theme_minimal() +
-  labs(title = "311 Calls Heatmap (Transparency Effect)",
-       subtitle = "Within 100ft Buffer",
+  labs(title = "Noise Calls Heatmap",
+       subtitle = "Within 1200ft of WSP, 100ft buffers around properties",
        color = NULL) +
   
   #Add a custom color palette for clarity
-  scale_color_manual(values = c("311 Calls" = "red", "NYU Properties" = "purple", "100ft Buffer" = "lightblue"))
+  scale_color_manual(values = c("Noise Complaints" = "red", "NYU Properties" = "purple", "100ft Buffer" = "lightblue"))
 
 
 print(heatmap)
