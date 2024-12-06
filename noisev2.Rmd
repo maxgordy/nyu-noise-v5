@@ -112,19 +112,19 @@ print(heatmap)
 # ---------------------------------------------------------------------------------------------------
 
 # mappluto <- st_read("mappluto_bbl_address.geojson") #from google drive /PLUTO
-
-#nyu landlord properties (justfix)
-justfix_nyu_props <- read.csv("nyuprops_who_owns_what_export.csv") #from github or drive /justfix
-
-# Filter the BBL polygons based on your property BBLs
-properties_sf_bbl <- mappluto[mappluto$APPBBL %in% justfix_nyu_props$bbl, ]
-
-#write out shapefiles of these properties
-# st_write(properties_sf_bbl, "nyuprops_bbl_address.geojson")
-
-
-# View the result
-plot(st_geometry(properties_sf_bbl), col = "purple")
+# 
+# #nyu landlord properties (justfix)
+# justfix_nyu_props <- read.csv("nyuprops_who_owns_what_export.csv") #from github or drive /justfix
+# 
+# # Filter the BBL polygons based on your property BBLs
+# properties_sf_bbl <- mappluto[mappluto$APPBBL %in% justfix_nyu_props$bbl, ]
+# 
+# #write out shapefiles of these properties
+# # st_write(properties_sf_bbl, "nyuprops_bbl_address.geojson")
+# 
+# 
+# # View the result
+# plot(st_geometry(properties_sf_bbl), col = "purple")
 
 ```
 
@@ -159,14 +159,14 @@ nyu_residence_halls <- nyu_residence_halls %>%
   mutate(
     BBL = c(
       56230, 55648, 55224, 52466, 4613, 5484, 4651, 4811, 84322, 8961,
-      87943, 60346, 17220, 55922, 4589, 46218, 4616, 4671, 55912
+      87944, 60346, 17220, 55922, 4589, 46218, 4616, 4671, 55912
     ),
     Add_2 = c(
-      "787 BROADWAY", "120 EAST 12 STREET", "35 WASHINGTON SQ W", 
+      "787 BROADWAY", "120 EAST 12 STREET", "35 WASHINGTON SQUARE W", 
       "100 BLEECKER STREET", "25 COOPER SQUARE", "5 UNIVERSITY PLACE", 
-      "31 3 AVENUE", "400 BROOME ST", "21 UNION SQUARE", "125 3 AVENUE", 
-      "xxx", "636 GREENWICH STREET", "76 LAFAYETTE STREET", "126 EAST 14TH STREET", 
-      "1 EAST 2 STREET", "38 E 7 STREET", "35 COOPER SQUARE", 
+      "31 3 AVENUE", "400 BROOME STREET", "21 UNION SQUARE", "125 3 AVENUE", 
+      "318 3 AVENUE", "636 GREENWICH STREET", "76 LAFAYETTE STREET", "126 EAST 14 STREET", 
+      "1 EAST 2 STREET", "38 EAST 7 STREET", "35 COOPER SQUARE", 
       "67 3 AVENUE", "106 EAST 14 STREET"
     )
   )
@@ -207,29 +207,18 @@ head(mappluto_clean)
 
 
 # Filter the mappluto dataset
-nyu_properties <- mappluto_clean %>%
-  filter(address %in% nyu_residence_halls$add_2)
+nyu_residence_halls_geom <- mappluto_clean %>%
+  filter(address %in% nyu_residence_halls$add_2) %>%
+  select(-appbbl)
+
 
 # Check the result
-print(nyu_properties)
+summary(nyu_residence_halls_geom)
 
-# Create the missing property as a data frame
-missing_property <- data.frame(
-  Building = "Gramercy Green",
-  Address = "310 3rd Avenue",
-  BBL = paste0("1", sprintf("%09d", 87943)), # Add "1" prefix and pad to 9 digits
-  Add_2 = NA  # If no second address is available, leave it as NA
-)
-
-# Append the missing property to the existing data
-nyu_properties <- bind_rows(nyu_properties, missing_property)
-
-# View the updated properties list
-print(nyu_properties)
+# Now write the shapefile
+st_write(nyu_residence_halls_geom, "residence_halls.shp", append = TRUE)
 
 
-# Optional: Save to a shapefile
-st_write(nyu_properties, "nyu_residence_halls.shp")
 
 ```
 
@@ -238,17 +227,24 @@ st_write(nyu_properties, "nyu_residence_halls.shp")
 #maybe unncessary if we can do this in QGIS but idk how
 
 # Create a 100-foot buffer around the properties
-buffer_100ft <- st_buffer(properties_sf_bbl, dist = 100) %>%
-  st_transform(crs = st_crs(properties_sf_bbl))
+buffer_100ft <- st_buffer(nyu_properties, dist = 100) %>%
+  st_transform(crs = st_crs(nyu_properties))
 
 # check crs
-# st_crs(buffer_100ft)
-# st_crs(properties_sf_bbl)
+st_crs(buffer_100ft)
+st_crs(nyu_properties)
 
 # Plot the result: Properties (purple points) and 100ft buffer (blue)
 plot(st_geometry(buffer_100ft), border = "blue", main = "NYU Properties and 100ft Buffer")
-plot(st_geometry(properties_sf_bbl), add = TRUE, col = "purple", pch = 16)
-plot(st_geometry(calls_sf), add = TRUE, col = "lightblue", pch = 16)
+plot(st_geometry(nyu_properties), add = TRUE, col = "purple", pch = 16)
+plot(st_geometry(data_within_buffer), add = TRUE, col = "pink", pch = 16)
+
+st_crs(buffer)
+nyu_properties <- nyu_properties %>% st_transform(4326)
+
+#remove properties outside of manhattan
+halls_within_buffer <- nyu_properties %>%
+  filter(st_within(geometry, buffer, sparse = FALSE) %>% rowSums() > 0)
 
 
 ```
@@ -304,9 +300,11 @@ st_crs(data_within_buffer)
 summary(data_within_buffer$longitude)  # Should be around -74 for NYC
 summary(data_within_buffer$latitude)   # Should be around 40.7 for NYC
 
-st_crs(properties_sf_bbl)
+st_crs(nyu_properties)
+summary(nyu_properties$longitude)  # Should be around -74 for NYC
+summary(nyu_properties$latitude)   # Should be around 40.7 for NYC
 
-calls_sf <- st_transform(data_within_buffer, crs = st_crs(properties_sf_bbl))
+data_within_buffer <- st_transform(data_within_buffer, crs = st_crs(nyu_properties))
 
 # # having crs issues :/ should probably figure this out in QGIS
 # calls_and_props <- st_join(calls_sf, properties_sf_bbl)
@@ -315,13 +313,13 @@ calls_sf <- st_transform(data_within_buffer, crs = st_crs(properties_sf_bbl))
 # Create the heatmap
 heatmap <- ggplot() +
   # Plot 311 Calls with transparency (alpha)
-  geom_sf(data = calls_sf, aes(color = "Noise Complaints"), alpha = 0.5, size = 0.5) +
+  geom_sf(data = data_within_buffer, aes(color = "Noise Complaints"), alpha = 0.5, size = 0.5) +
   
   # Plot Buffer layer with light blue semi-transparent fill and no outline
   geom_sf(data = buffer_100ft, fill = "100ft Buffer", color = NA, border = "blue", alpha = 0.5) +
   
   # Plot properties with purple outline and no fill (transparent)
-  geom_sf(data = properties_sf_bbl, aes(color = "NYU Properties"), fill = NA, alpha = 1, size = 2) +
+  geom_sf(data = nyu_properties, aes(color = "NYU Properties"), fill = NA, alpha = 1, size = 2) +
   
   # Customize theme and labels
   theme_minimal() +

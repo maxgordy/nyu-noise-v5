@@ -86,7 +86,7 @@ MapPluto
 | Broome Street          | 400 Broome Street      | 4811  | 400 BROOME ST        |
 | Carlyle Court          | 25 Union Square West   | 84322 | 21 UNION SQUARE      |
 | Coral Tower            | 129 Third Avenue       | 8961  | 125 3 AVENUE         |
-| Gramercy Green         | 310 3rd Avenue         | 87943 |                      |
+| Gramercy Green         | 310 3rd Avenue         | 87944 | 318 3 AVENUE         |
 | Greenwich Hall         | 636 Greenwich Street   | 60346 | 636 GREENWICH STREET |
 | Lafayette Hall         | 80 Lafayette Street    | 17220 | 76 LAFAYETTE STREET  |
 | Palladium Hall         | 140 East 14th Street   | 55922 | 126 EAST 14TH STREET |
@@ -96,14 +96,18 @@ MapPluto
 | Third North            | 75 Third Avenue        | 4671  | 67 3 AVENUE          |
 | University Hall        | 110 East 14th Street   | 55912 | 106 EAST 14 STREET   |
 
+NOTE: GRAMERCY GREEN USES ADDRESS OF BUILDING NEXT TO IT BC NO ADDRESS IS LISTED FOR LOT
 
-
+REMOVED ADDRESSES
 
 | Clark Street  | 55 Clark Street |     | 51 CLARK |
 | ------------- | --------------- | --- | -------- |
 | STUY TOWN<br> |                 |     |          |
 | WSV           |                 |     |          |
+|               |                 |     |          |
 
+DUPLICATE ADDRESSES IN MAPPLUTO
+"35 WASHINGTON SQ W"   "400 BROOME ST"        "126 EAST 14TH STREET" "38 E 7 STREET"   
 
 ### noise/displacement data
 - 311 data
