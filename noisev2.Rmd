@@ -134,26 +134,63 @@ plot(st_geometry(properties_sf_bbl), col = "purple")
 mappluto_clean <- read_sf("mappluto_bbl_address.geojson") %>%
   clean_names()
 
-# Define the NYU residence halls and their addresses
+# Original address table
 nyu_residence_halls <- data.frame(
-  building = c(
-    "Brittany Hall", "Founders Hall", "Lipton Hall", 
-    "Res College at Paulson", "Rubin Hall", "Weinstein Hall", 
-    "Alumni Hall", "Broome Street", "Carlyle Court", "Coral Tower", 
-    "Gramercy Green", "Greenwich Hall", "Lafayette Hall", 
-    "Palladium Hall", "Second Street", "Seventh Street", 
-    "Sixth Street", "Third North", "University Hall", "Clark Street"
+  Building = c(
+    "Brittany Hall", "Founders Hall", "Lipton Hall", "Res College at Paulson",
+    "Rubin Hall", "Weinstein Hall", "Alumni Hall", "Broome Street",
+    "Carlyle Court", "Coral Tower", "Gramercy Green", "Greenwich Hall",
+    "Lafayette Hall", "Palladium Hall", "Second Street", "Seventh Street",
+    "Sixth Street", "Third North", "University Hall"
   ),
-  address = c(
+  Address = c(
     "55 East 10th Street", "120 East 12th Street", "33 Washington Square",
     "181 Mercer Street", "35 Fifth Street", "5 University Place",
-    "33 Third Avenue", "400 Broome Street", "25 Union Square West", 
+    "33 Third Avenue", "400 Broome Street", "25 Union Square West",
     "129 Third Avenue", "310 3rd Avenue", "636 Greenwich Street",
-    "80 Lafayette Street", "140 East 14th Street", "1 East 2nd Street", 
-    "40 East Seventh Street", "200 East 6th St", "75 Third Avenue", 
-    "110 East 14th Street", "55 Clark Street"
+    "80 Lafayette Street", "140 East 14th Street", "1 East 2nd Street",
+    "40 East Seventh Street", "200 East 6th St", "75 Third Avenue",
+    "110 East 14th Street"
   )
 )
+
+# Add BBL and Add 2 columns
+nyu_residence_halls <- nyu_residence_halls %>%
+  mutate(
+    BBL = c(
+      56230, 55648, 55224, 52466, 4613, 5484, 4651, 4811, 84322, 8961,
+      87943, 60346, 17220, 55922, 4589, 46218, 4616, 4671, 55912
+    ),
+    Add_2 = c(
+      "787 BROADWAY", "120 EAST 12 STREET", "35 WASHINGTON SQ W", 
+      "100 BLEECKER STREET", "25 COOPER SQUARE", "5 UNIVERSITY PLACE", 
+      "31 3 AVENUE", "400 BROOME ST", "21 UNION SQUARE", "125 3 AVENUE", 
+      "xxx", "636 GREENWICH STREET", "76 LAFAYETTE STREET", "126 EAST 14TH STREET", 
+      "1 EAST 2 STREET", "38 E 7 STREET", "35 COOPER SQUARE", 
+      "67 3 AVENUE", "106 EAST 14 STREET"
+    )
+  )
+
+# Add the Manhattan borough code ("1") as a prefix to BBL
+nyu_residence_halls <- nyu_residence_halls %>%
+  mutate(
+    BBL = paste0("1", sprintf("%09d", as.numeric(BBL))) # Ensure numeric BBL and pad to 9 digits
+  )
+
+# Normalize addresses in both datasets
+nyu_residence_halls <- nyu_residence_halls %>%
+  mutate(Add_2 = str_to_upper(Add_2)) %>%  # Convert to uppercase
+  clean_names()
+
+str(nyu_residence_halls$bbl)
+str(mappluto_clean$bbl)
+
+# mappluto_clean <- mappluto_clean %>%
+#   mutate(address = str_trim(str_to_upper(address)))   
+
+
+# View the updated dataset
+print(nyu_residence_halls)
 
 # # Geocode the addresses to get APPBBL (replace with real APPBBL values if known)
 # geocoded_halls <- data.frame(
@@ -163,25 +200,36 @@ nyu_residence_halls <- data.frame(
 #   )
 # )
 
-head(mappluto_clean$address)
+### troubleshooting addresses
 
-# Normalize addresses in both datasets
-nyu_residence_halls <- nyu_residence_halls %>%
-  mutate(address = str_to_upper(address))  # Convert to uppercase
+# Look at some mappluto addresses
+head(mappluto_clean)
 
-mappluto_clean <- mappluto_clean %>%
-  mutate(address = str_trim(str_to_upper(address)))   
 
 # Filter the mappluto dataset
 nyu_properties <- mappluto_clean %>%
-  filter(address %in% nyu_residence_halls$address)
+  filter(address %in% nyu_residence_halls$add_2)
 
 # Check the result
 print(nyu_properties)
 
+# Create the missing property as a data frame
+missing_property <- data.frame(
+  Building = "Gramercy Green",
+  Address = "310 3rd Avenue",
+  BBL = paste0("1", sprintf("%09d", 87943)), # Add "1" prefix and pad to 9 digits
+  Add_2 = NA  # If no second address is available, leave it as NA
+)
+
+# Append the missing property to the existing data
+nyu_properties <- bind_rows(nyu_properties, missing_property)
+
+# View the updated properties list
+print(nyu_properties)
+
+
 # Optional: Save to a shapefile
 st_write(nyu_properties, "nyu_residence_halls.shp")
-
 
 ```
 
