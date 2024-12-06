@@ -58,6 +58,7 @@ MapPluto
 		- map
 - JustFix
 	- Properties purchased since 20
+
 *NYU NOHOSOHO PROPERTIES*
 
 | Name                                                                                                                                                                    | Address              | Latitude | Longitude | BBL |

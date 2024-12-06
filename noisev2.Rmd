@@ -94,7 +94,7 @@ heatmap <- ggplot() +
 print(heatmap)
 ```
 
-```{r props w BBLs}
+```{r justfix props w BBLs}
 
 # ---------------------------------------------------------------------------------------------------
 #ignore if you use file from drive - THIS IS HOW TO GET TO SHAPEFILE I READ IN BELOW (we can avoid using entire mappluto file now)
@@ -127,6 +127,64 @@ properties_sf_bbl <- mappluto[mappluto$APPBBL %in% justfix_nyu_props$bbl, ]
 plot(st_geometry(properties_sf_bbl), col = "purple")
 
 ```
+
+```{r res hall props}
+#mappluto shapefile
+
+mappluto_clean <- read_sf("mappluto_bbl_address.geojson") %>%
+  clean_names()
+
+# Define the NYU residence halls and their addresses
+nyu_residence_halls <- data.frame(
+  building = c(
+    "Brittany Hall", "Founders Hall", "Lipton Hall", 
+    "Res College at Paulson", "Rubin Hall", "Weinstein Hall", 
+    "Alumni Hall", "Broome Street", "Carlyle Court", "Coral Tower", 
+    "Gramercy Green", "Greenwich Hall", "Lafayette Hall", 
+    "Palladium Hall", "Second Street", "Seventh Street", 
+    "Sixth Street", "Third North", "University Hall", "Clark Street"
+  ),
+  address = c(
+    "55 East 10th Street", "120 East 12th Street", "33 Washington Square",
+    "181 Mercer Street", "35 Fifth Street", "5 University Place",
+    "33 Third Avenue", "400 Broome Street", "25 Union Square West", 
+    "129 Third Avenue", "310 3rd Avenue", "636 Greenwich Street",
+    "80 Lafayette Street", "140 East 14th Street", "1 East 2nd Street", 
+    "40 East Seventh Street", "200 East 6th St", "75 Third Avenue", 
+    "110 East 14th Street", "55 Clark Street"
+  )
+)
+
+# # Geocode the addresses to get APPBBL (replace with real APPBBL values if known)
+# geocoded_halls <- data.frame(
+#   address = nyu_residence_halls$address,
+#   APPBBL = c(
+#     # Add APPBBL values manually or use a geocoding step here
+#   )
+# )
+
+head(mappluto_clean$address)
+
+# Normalize addresses in both datasets
+nyu_residence_halls <- nyu_residence_halls %>%
+  mutate(address = str_to_upper(address))  # Convert to uppercase
+
+mappluto_clean <- mappluto_clean %>%
+  mutate(address = str_trim(str_to_upper(address)))   
+
+# Filter the mappluto dataset
+nyu_properties <- mappluto_clean %>%
+  filter(address %in% nyu_residence_halls$address)
+
+# Check the result
+print(nyu_properties)
+
+# Optional: Save to a shapefile
+st_write(nyu_properties, "nyu_residence_halls.shp")
+
+
+```
+
 
 ```{r bbl props buffer}
 #maybe unncessary if we can do this in QGIS but idk how
