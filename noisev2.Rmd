@@ -92,6 +92,8 @@ heatmap <- ggplot() +
        color = NULL)
 
 print(heatmap)
+
+write_sf(buffer, "1200.radius.buffer.geojson")
 ```
 
 ```{r justfix props w BBLs}
@@ -245,7 +247,7 @@ plot(st_geometry(nyu_residence_halls_geom), add = TRUE, col = "purple", pch = 16
 plot(st_geometry(data_within_buffer), add = TRUE, col = "pink", pch = 16)
 
 # write out shapefiles of buffers
-st_write(qgis_halls, "BUFFERS_NYU_MN_Residence_Halls_CleanedGeo.geojson", append = TRUE)
+st_write(buffer_100ft, "BUFFERS_NYU_MN_Residence_Halls_CleanedGeo.geojson", append = TRUE)
 
 # st_crs(buffer)
 # nyu_properties <- nyu_properties %>% st_transform(4326)
