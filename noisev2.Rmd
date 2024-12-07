@@ -341,5 +341,88 @@ st_write(data_within_buffer, "calls_within_buffer_2263.geojson")
 
 ```
 
+## MARGOT CODE #####
+## BUILDINGS WITH CALLS SF TO CSV##
+
+# Step 1: Read the GeoJSON file
+calls_with_buildings <- st_read("Calls_Associated_with_Buildings.geojson")
+
+# Step 2: Remove geometry if not needed (optional)
+# Convert to a data frame, drop the geometry column, and rename 'address_2' to 'nyu_address'
+calls_with_buildings_df <- calls_with_buildings %>%
+  st_drop_geometry() %>%
+  rename(nyu_address = address_2)  # Rename address_2 to nyu_address
+
+# Step 3: Save the data frame as a CSV file
+write.csv(calls_with_buildings_df, "Calls_Associated_with_Buildings.csv", row.names = FALSE)
+
+# Alternatively, using readr for better control over formatting
+# readr::write_csv(calls_with_buildings_df, "Calls_Associated_with_Buildings.csv")
+
+# Read the dataset
+calls_associated_buildings <- read.csv("Calls_Associated_with_Buildings.csv")
+
+# Select only the desired columns and save to a new object
+calls_associated_buildings_clean <- calls_associated_buildings %>%
+  select(unique_key, complaint_, descriptor, incident_a, street_nam, location, year, address_2, distance)
+
+# Rename the column 'address' to 'nyu_address'
+calls_associated_buildings_clean <- calls_associated_buildings_clean %>%
+  rename(nyu_address = address_2)
+
+# View the resulting dataset
+head(calls_associated_buildings_clean)
+
+write.csv(calls_associated_buildings_clean, "Calls_Associated_with_Buildings_Clean.csv", row.names = FALSE)
+
+
+# SUMMARIZE ##
+# Group by nyu_address and descriptor, then count the total number
+summary_by_address_descriptor <- calls_associated_buildings_clean %>%
+  group_by(nyu_address, descriptor) %>%
+  summarise(total_calls = n(), .groups = "drop") %>%
+  pivot_wider(names_from = descriptor, values_from = total_calls, values_fill = 0) %>%
+  mutate(Total = rowSums(across(where(is.numeric)))) %>% # Add row-wise totals
+  bind_rows(
+    summarise_all(., ~ if(is.numeric(.)) sum(.) else "Total") # Add total row
+  )
+
+# View the reshaped summary
+print(summary_by_address_descriptor)
+
+# Save the summary to a CSV file
+write.csv(summary_by_address_descriptor, "Summary_by_Address_Descriptor.csv", row.names = FALSE)
+
+##SUMMARY 2##
+
+# Group by nyu_address and year, then count the total number of calls
+summary_by_address_year <- calls_associated_buildings_clean %>%
+  group_by(nyu_address, year) %>%
+  summarise(total_calls = n(), .groups = "drop") %>%
+  pivot_wider(names_from = nyu_address, values_from = total_calls, values_fill = 0) %>%
+  mutate(Total = rowSums(across(where(is.numeric)))) # Add row-wise totals
+
+# Add a bottom row for total calls across all years and addresses
+summary_by_address_year <- summary_by_address_year %>%
+  bind_rows(
+    summarise_all(., ~ if(is.numeric(.)) sum(.) else "Total")
+  )
+# Save the summary to a CSV file
+write.csv(summary_by_address_year, "Summary_by_Address_Year.csv", row.names = FALSE)
+
+## SUMMARY 2 MODIFIED WITHOUT TOTAL COLUMN AND ROW ##
+
+# Group by nyu_address and year, then count the total number of calls
+summary_by_address_year2 <- calls_associated_buildings_clean %>%
+  group_by(nyu_address, year) %>%
+  summarise(total_calls = n(), .groups = "drop") %>%
+  pivot_wider(names_from = nyu_address, values_from = total_calls, values_fill = 0)
+
+# Save the summary to a CSV file
+write.csv(summary_by_address_year2, "Summary_by_Address_Year2.csv", row.names = FALSE)
+
+
+
+
 
 
