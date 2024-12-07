@@ -215,6 +215,10 @@ nyu_residence_halls_geom <- mappluto_clean %>%
 # Check the result
 summary(nyu_residence_halls_geom)
 
+
+# View the result
+plot(st_geometry(nyu_residence_halls_geom), col = "purple")
+
 # Now write the shapefile
 st_write(nyu_residence_halls_geom, "residence_halls.shp", append = TRUE)
 
@@ -224,29 +228,27 @@ st_write(nyu_residence_halls_geom, "residence_halls.shp", append = TRUE)
 
 
 ```{r bbl props buffer}
-#maybe unncessary if we can do this in QGIS but idk how
+# read margots QGIS shapefile
+qgis_halls <- read_sf("~/Desktop/GitHub/nyu-noise-v5/NYU_MN_Residence_Halls_CleanedGeo.geojson")
 
 # Create a 100-foot buffer around the properties
-buffer_100ft <- st_buffer(nyu_properties, dist = 100) %>%
-  st_transform(crs = st_crs(nyu_properties))
+buffer_100ft <- st_buffer(qgis_halls, dist = 100) %>%
+  st_transform(crs = st_crs(qgis_halls))
 
 # check crs
 st_crs(buffer_100ft)
-st_crs(nyu_properties)
+st_crs(nyu_residence_halls_geom)
 
 # Plot the result: Properties (purple points) and 100ft buffer (blue)
 plot(st_geometry(buffer_100ft), border = "blue", main = "NYU Properties and 100ft Buffer")
-plot(st_geometry(nyu_properties), add = TRUE, col = "purple", pch = 16)
+plot(st_geometry(nyu_residence_halls_geom), add = TRUE, col = "purple", pch = 16)
 plot(st_geometry(data_within_buffer), add = TRUE, col = "pink", pch = 16)
 
-st_crs(buffer)
-nyu_properties <- nyu_properties %>% st_transform(4326)
+# write out shapefiles of buffers
+st_write(qgis_halls, "BUFFERS_NYU_MN_Residence_Halls_CleanedGeo.geojson", append = TRUE)
 
-#remove properties outside of manhattan
-halls_within_buffer <- nyu_properties %>%
-  filter(st_within(geometry, buffer, sparse = FALSE) %>% rowSums() > 0)
-
-
+# st_crs(buffer)
+# nyu_properties <- nyu_properties %>% st_transform(4326)
 ```
 
 
