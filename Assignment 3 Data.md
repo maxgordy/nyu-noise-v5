@@ -121,7 +121,7 @@ DUPLICATE ADDRESSES IN MAPPLUTO
 new plan
 - pull lot info of 7/8 nyu properties, put into data frame
 	- ![[Screenshot 2024-12-05 at 11.12.15 AM.png]]
-
+summary by address description
 # Graphics
 
 # Writing Portion
