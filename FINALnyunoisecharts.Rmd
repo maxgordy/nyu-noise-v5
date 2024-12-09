@@ -21,12 +21,10 @@ library(htmlwidgets)
 ```
 
 ```{r read in data}
-unique(calls$incident_z)
 calls<-read.csv("Calls_Associated_with_Buildings.csv")
 summary_by_year <- read.csv("Summary_by_Address_Year2.csv")
 summary_by_descriptor <- read.csv("Summary_by_Address_Descriptor.csv")
 student_pop <- read_csv("Full-Time vs Part-Time Enrollment.csv")
-# calls_sf <- read_csv("311_Noise_Complaints.csv") #only need to read if not existing from other R file
 ```
 
 ```{r date formatting}
@@ -41,13 +39,15 @@ calls <- calls %>%
 ```
 
 ```{r address bar chart}
+# summarize addresses
+calls_summary_address <- calls %>%
+  group_by(nyu_address) %>%
+  summarise(count = n(), .groups = 'drop')
+
 #take top ten
 top_calls_summary <- calls_summary_address %>%
   arrange(desc(count)) %>%
   slice_head(n = 10) # Select the top 10 addresses by call count
-
-# print address summary 
-print(calls_summary_address)
 
 #address bar chart
 ggplot(top_calls_summary, aes(x = reorder(nyu_address, -count), y = count, fill = nyu_address)) +
@@ -178,13 +178,39 @@ ggplot() +
 calls_summary_descriptor_plot
 
 
-
 # ggsave("calls_summary_descriptor_plot.pdf", plot = calls_summary_descriptor_plot, device = "pdf", width = 10, height = 6)
 ```
 #ALL CALLS EXCEPT
 ```{r comparison to non-nyu located calls}
 
+# #---------------------------- re pull calls_sf if not saved from other dataset
+# date format and extract the year
+calls <- calls %>%
+  mutate(Created.Date = as.Date(Created.Date, format = "%m/%d/%Y"),
+         Year = as.numeric(format(Created.Date, "%Y")))
+
+# Specify the noise complaint types to keep
+descriptors_to_keep <- c(
+  "Banging/Pounding", "Loud Music/Party", "Loud Talking", "Loud Television",
+  "Noise: Alarms", "Noise: Construction Before/After Hours (NM1)",
+  "Noise: Construction Equipment (NC1)", "Noise: Jack Hammering (NC2)",
+  "Noise: Loud Music/Daytime (Mark Date and Time) (NN1)",
+  "Noise: Loud Music/Nighttime(Mark Date and Time) (NP1)",
+  "People Created Noise"
+)
+
+#Filter the dataset by the complaint types
+calls_filtered <- calls %>%
+  filter(Descriptor %in% descriptors_to_keep) %>%
+  filter(!is.na(Latitude) & !is.na(Longitude)) %>%  #count NAs
+  clean_names()
+
+#convert to sf
+calls_sf <- st_as_sf(calls_filtered, coords = c("longitude", "latitude"), remove = FALSE, crs = 2236)
+# #------------------------------------------
+
 all_calls <- calls_sf %>% 
+  clean_names() %>% 
   filter(incident_zip %in% c(10003, 10013, 10011, 10012, 10014, 10010))
 
 all_calls_summary_total <- all_calls %>% 
