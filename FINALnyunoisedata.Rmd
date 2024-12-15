@@ -222,8 +222,6 @@ plot(st_geometry(nyu_residence_halls_geom), col = "purple")
 # Now write the shapefile
 st_write(nyu_residence_halls_geom, "residence_halls.shp", append = TRUE)
 
-
-
 ```
 
 
@@ -250,50 +248,6 @@ st_write(buffer_100ft, "BUFFERS_NYU_MN_Residence_Halls_CleanedGeo.geojson", appe
 # st_crs(buffer)
 # nyu_properties <- nyu_properties %>% st_transform(4326)
 ```
-
-
-
-```{r prop w COORDINATES via google API}
-#Ignore since we're using bbls instead
-
-# library(ggmap)
-# register_google(key = "ADD KEY")
-
-# #list of NYU buildings within neighborhood plan
-# addresses <- data.frame(
-#   address = c(
-#     "35 West 4th Street, New York, NY",
-#     "726 Broadway, New York, NY",
-#     "708 Broadway, New York, NY",
-#     "404 Lafayette, New York, NY",
-#     "14 E 4th Street, New York, NY",
-#     "383 Lafayette Street, New York, NY",
-#     "411 Lafayette Street, New York, NY",
-#     "20 Cooper Square, New York, NY"
-#   )
-# )
-# ### COORDINATES w google API
-# 
-# # Convert to sf object (EPSG:4326 by default)
-# coordinates <- addresses %>%
-#   mutate_geocode(address, method = "google", latitude = "latitude", longitude = "longitude")
-# 
-# # Check coordinates returned by geocode
-# print(coordinates)
-# summary(coordinates$longitude)  # Should be around -74 for NYC
-# summary(coordinates$latitude)   # Should be around 40.7 for NYC
-# 
-# # Step 3: Convert to sf object in EPSG:4326 (default from geocode)
-# properties_sf <- st_as_sf(coordinates, coords = c("latitude", "longitude"), crs = 4326)
-# 
-# # # Step 4: Transform to EPSG:2263
-# # properties_sf_2263 <- st_transform(properties_sf, crs = 2263)
-# # 
-# # # Check CRS
-# # st_crs(properties_sf_2263)  # Should now be EPSG:2263
-
-```
-
 
 ```{r properties with buffer}
 
